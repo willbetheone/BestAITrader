@@ -571,6 +571,40 @@ async def test_akshare_realtime_market_keeps_volume_in_shares():
 
 
 @pytest.mark.asyncio
+async def test_akshare_index_daily_persists_standard_index_code():
+    """AKShare 指数日线应写入与其他数据源一致的标准指数代码。"""
+    ingestor = AkshareIngestor.__new__(AkshareIngestor)
+    ingestor.source = "akshare"
+    ingestor.ingestion_service = Mock()
+    ingestor.ingestion_service.write_dataframe = AsyncMock(return_value=True)
+    ingestor._run_in_executor = AsyncMock(
+        return_value=pd.DataFrame(
+            [
+                {
+                    "date": "2026-08-04",
+                    "open": 4000.0,
+                    "close": 4010.0,
+                    "high": 4020.0,
+                    "low": 3990.0,
+                    "volume": 1000000,
+                    "amount": 100000000,
+                }
+            ]
+        )
+    )
+
+    result = await ingestor.fetch_and_ingest_index_daily(
+        index_code="000300.SH",
+        start_date="2026-08-04",
+        end_date="2026-08-04",
+    )
+
+    written_df = ingestor.ingestion_service.write_dataframe.await_args.args[1]
+    assert result["success"] is True
+    assert written_df.iloc[0]["index_code"] == "000300.SH"
+
+
+@pytest.mark.asyncio
 async def test_akshare_block_trade_normalizes_source_units():
     """AKShare 大宗交易原始股数、元和比例应换算为库表约定单位。"""
     ingestor = AkshareIngestor.__new__(AkshareIngestor)
@@ -698,6 +732,37 @@ class TestFailoverMechanism:
                         )
 
                         assert result is False, "所有数据源失败应该返回 False"
+
+    @pytest.mark.asyncio
+    async def test_failover_uses_backup_after_failed_result_payload(
+        self, test_date_range
+    ):
+        """采集器返回失败载荷时应继续尝试备用数据源。"""
+        start_date, end_date = test_date_range
+        tushare_ingestor = ingestor_manager.get_ingestor("tushare")
+        akshare_ingestor = ingestor_manager.get_ingestor("akshare")
+
+        with patch("app.data.ingestors.manager.settings.ENABLE_DATA_SOURCE_FAILOVER", True):
+            with patch.object(ingestor_manager, "default_source", "tushare"):
+                with patch.object(
+                    tushare_ingestor,
+                    "fetch_and_ingest_index_daily",
+                    return_value={"success": False, "data": [], "count": 0},
+                ) as mock_tushare:
+                    with patch.object(
+                        akshare_ingestor,
+                        "fetch_and_ingest_index_daily",
+                        return_value={"success": True, "data": [], "count": 1},
+                    ) as mock_akshare:
+                        result = await ingestor_manager.fetch_and_ingest_index_daily(
+                            index_code="000300.SH",
+                            start_date=start_date,
+                            end_date=end_date,
+                        )
+
+        assert result == {"success": True, "data": [], "count": 1}
+        mock_tushare.assert_awaited_once()
+        mock_akshare.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_failover_first_source_success(

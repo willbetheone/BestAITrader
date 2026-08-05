@@ -178,7 +178,11 @@ class IngestorManager(BaseIngestor):
                     loop = asyncio.get_running_loop()
                     result = await loop.run_in_executor(None, lambda: method(*args, **kwargs))
 
-                if result is not None and result is not False:
+                success = result is not None and result is not False
+                if isinstance(result, dict):
+                    success = result.get("success") is True
+
+                if success:
                     logger.debug(
                         "ingestor method succeeded",
                         extra={

@@ -301,7 +301,6 @@ services:
         condition: service_healthy
     ports:
       - "80:8080"
-      - "8080:8080"
       # LiteLLM OpenAI-compatible API and Admin UI (/ui), exposed through nginx.
       - "4000:4000"
     healthcheck:

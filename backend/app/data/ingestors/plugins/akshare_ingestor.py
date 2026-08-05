@@ -601,7 +601,7 @@ class AkshareIngestor(BaseIngestor):
             }, inplace=True)
 
             # 补充字段
-            df['index_code'] = symbol
+            df['index_code'] = StockCodeStandardizer.standardize(symbol)
             df['data_source'] = self.source
             df['trade_date'] = df['trade_date'].dt.date
             if 'volume' in df.columns:

@@ -1,0 +1,32 @@
+# 天枢智投阿里云自动化部署配置模板。
+# 用法：cp scripts/deploy.conf.example deploy.conf，填写后运行 bash scripts/deploy-aliyun.sh
+# 注意：deploy.conf 含密钥，已加入 .gitignore，请勿强制提交。
+
+# ---- 初始超级用户 ----
+SUPERUSER="tradeuser"
+SUPERUSER_EMAIL="tradeuser@example.com"
+# 至少 12 位（必填）
+SUPERUSER_PASSWORD=""
+
+# ---- 主 LLM API（必填，需兼容 OpenAI chat/completions 接口）----
+LLM_API_BASE="https://api.deepseek.com"
+LLM_API_KEY=""
+# 供应商真实模型名，用于部署时直连校验
+LLM_VALIDATION_MODEL="deepseek-v4-flash"
+# LiteLLM provider/model 写法，写入 litellm/config.yaml
+LLM_LITELLM_MODEL="deepseek/deepseek-v4-flash"
+
+# ---- 可选：第二组 LLM API（不填则跳过）----
+# LLM2_API_BASE="https://api.deepseek.com"
+# LLM2_API_KEY=""
+# LLM2_VALIDATION_MODEL="deepseek-v4-flash"
+# LLM2_LITELLM_MODEL="deepseek/deepseek-v4-flash"
+
+# ---- 可选：阿里云容器镜像加速器 ----
+# 控制台 > 容器镜像服务 > 镜像工具 > 镜像加速器，形如 https://xxxx.mirror.aliyuncs.com
+# 注意：加速器对 ghcr.io 镜像不一定生效，拉取失败时需配置 HTTP 代理或手动同步镜像。
+DOCKER_REGISTRY_MIRROR=""
+
+# ---- 可选：固定密钥（不填则自动生成，重跑时建议保留生成值以免覆盖）----
+# SECRET_KEY=""
+# LITELLM_MASTER_KEY=""

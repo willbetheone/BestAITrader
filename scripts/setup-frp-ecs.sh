@@ -51,12 +51,26 @@ if [[ -x "$INSTALL_DIR/frps" ]] && "$INSTALL_DIR/frps" --version 2>/dev/null | g
     log "frps $FRP_VERSION 已安装，跳过下载。"
 else
     mkdir -p "$INSTALL_DIR"
-    log "下载 frp v${FRP_VERSION}（${ARCH}）..."
-    if ! curl -fsSL --retry 3 -o "/tmp/$TARBALL" "$URL"; then
-        # GitHub 直连失败时回退到 ghproxy 镜像
-        warn "GitHub 直连失败，尝试镜像加速下载..."
-        curl -fsSL --retry 3 -o "/tmp/$TARBALL" "https://ghfast.top/$URL" \
-            || die "frp 下载失败，请检查网络或手动下载 $URL 放到 /tmp/ 后重试。"
+    if [[ -s "/tmp/$TARBALL" ]]; then
+        log "检测到已有安装包 /tmp/$TARBALL，直接复用。"
+    else
+        log "下载 frp v${FRP_VERSION}（${ARCH}），依次尝试官方与加速镜像..."
+        # 每个源限时 120 秒，逐个回退；也可提前手动把 tarball 放到 /tmp/ 复用
+        MIRRORS=(
+            "$URL"
+            "https://ghfast.top/$URL"
+            "https://gh-proxy.com/$URL"
+        )
+        dl_ok=0
+        for m in "${MIRRORS[@]}"; do
+            log "尝试下载：$m"
+            if curl -fsSL --connect-timeout 10 --max-time 120 --retry 2 -o "/tmp/$TARBALL" "$m"; then
+                dl_ok=1
+                break
+            fi
+            warn "该源失败，尝试下一个..."
+        done
+        [[ $dl_ok -eq 1 ]] || die "全部下载源失败。可手动下载 $URL 放到 /tmp/ 后重跑本脚本（会自动复用）。"
     fi
     tar -xzf "/tmp/$TARBALL" -C /tmp
     install -m 0755 "/tmp/frp_${FRP_VERSION}_linux_${ARCH}/frps" "$INSTALL_DIR/frps"

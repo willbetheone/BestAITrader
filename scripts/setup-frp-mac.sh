@@ -44,7 +44,7 @@ die()  { echo -e "\033[31m[frp-mac][error]\033[0m $*" >&2; exit 1; }
 FRPC_BIN=""
 if command -v frpc >/dev/null 2>&1; then
     FRPC_BIN="$(command -v frpc)"
-    log "复用已有 frpc：$FRPC_BIN（$("$FRPC_BIN" --version 2>/dev/null || echo 未知版本)）"
+    log "复用已有 frpc：${FRPC_BIN}（$("${FRPC_BIN}" --version 2>/dev/null || echo 未知版本)）"
 elif command -v brew >/dev/null 2>&1; then
     log "通过 Homebrew 安装 frp..."
     brew install frp

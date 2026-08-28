@@ -74,7 +74,7 @@ python3 deploy.py
 
 ```bash
 FRP_SERVER_ADDR=<ECS公网IP> FRP_TOKEN=<令牌> REMOTE_PORT=18080 \
-    bash scripts/setup-frp-mac.sh
+    bash scripts/frp_ecs_mac/setup-frp-mac.sh
 ```
 
 脚本自动完成：安装 frpc（Homebrew 优先，无则下载官方二进制）

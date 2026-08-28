@@ -2,10 +2,10 @@
 # 天枢智投(BestAITrader) 个人自用方案 —— ECS 就绪检测脚本（只读检查，不改动任何配置）。
 #
 # 用法（在 ECS 上执行，root 或普通用户均可）：
-#   bash scripts/check-ecs-readiness.sh
+#   bash scripts/frp_ecs_mac/check-ecs-readiness.sh
 #
 # 检测项：systemd / CPU 架构 / 80 与 7000 端口占用 / 外网连通性 / 内存与磁盘参考。
-# 全部 PASS 即可执行 sudo bash scripts/setup-frp-ecs.sh。
+# 全部 PASS 即可执行 sudo bash scripts/frp_ecs_mac/setup-frp-ecs.sh。
 
 set -uo pipefail
 
@@ -34,7 +34,7 @@ else
     if sudo -n true 2>/dev/null; then
         ok "当前用户具备免密 sudo。"
     else
-        note "当前非 root 且 sudo 需要密码，部署时请用 sudo bash scripts/setup-frp-ecs.sh 并输入密码。"
+        note "当前非 root 且 sudo 需要密码，部署时请用 sudo bash scripts/frp_ecs_mac/setup-frp-ecs.sh 并输入密码。"
     fi
 fi
 
@@ -131,7 +131,7 @@ echo ""
 echo "============================================================"
 if [[ $FAIL -eq 0 ]]; then
     echo -e " \033[32m检测通过：PASS=$PASS FAIL=$FAIL WARN=$WARN\033[0m"
-    echo " 下一步：sudo bash scripts/setup-frp-ecs.sh"
+    echo " 下一步：sudo bash scripts/frp_ecs_mac/setup-frp-ecs.sh"
     exit 0
 else
     echo -e " \033[31m检测未通过：PASS=$PASS FAIL=$FAIL WARN=$WARN，请先解决上方 FAIL 项。\033[0m"

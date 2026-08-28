@@ -56,7 +56,7 @@ Mac 端 Docker Desktop 资源设置（16G 内存属最低配置）：
 把项目同步到 ECS（只需 `scripts/` 目录即可）后执行：
 
 ```bash
-sudo bash scripts/setup-frp-ecs.sh
+sudo bash scripts/frp_ecs_mac/setup-frp-ecs.sh
 ```
 
 脚本自动完成：
@@ -105,7 +105,7 @@ sudo pmset -a sleep 0
 用步骤 1 记下的令牌执行：
 
 ```bash
-FRP_SERVER_ADDR=<ECS公网IP> FRP_TOKEN=<步骤1输出的令牌> bash scripts/setup-frp-mac.sh
+FRP_SERVER_ADDR=<ECS公网IP> FRP_TOKEN=<步骤1输出的令牌> bash scripts/frp_ecs_mac/setup-frp-mac.sh
 ```
 
 若 ECS 端改过端口，追加 `FRP_SERVER_PORT` / `REMOTE_PORT` 保持一致。
